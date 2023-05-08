@@ -2,7 +2,6 @@ package core
 
 import (
 	"log"
-	"time"
 
 	"github.com/kli8nt/kli8nt-kube/config"
 	"github.com/kli8nt/kli8nt-kube/utils"
@@ -15,7 +14,7 @@ func Start() {
 	if err != nil {
 		log.Println(err)
 	}
-	time.Sleep(10 * time.Second)
+	/*time.Sleep(10 * time.Second)
 
 	err = utils.UpdateDeployment("default", "adam", "httpd")
 	if err != nil {
@@ -23,11 +22,17 @@ func Start() {
 	}
 	log.Println("The Deployment is Updated")
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(10 * time.Second)*/
+	err = utils.DeleteService("default", "adam")
+	if err != nil {
+		log.Println(err)
+	}
+
+	/*time.Sleep(10 * time.Second)
 
 	err = utils.DeleteDeployment("default", "adam")
 	if err != nil {
 		log.Println(err)
-	}
+	}*/
 
 }
