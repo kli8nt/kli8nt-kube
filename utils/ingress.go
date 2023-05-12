@@ -122,3 +122,30 @@ func AddIngressRule(ingressName, namespace, serviceName string, port int32) erro
 
 	return nil
 }
+
+func DeleteIngressRule(ingressName, namespace, serviceName string) error {
+	rules := []networkingv1.IngressRule{}
+
+	// Get the ingress object from the API server
+	ingress, err := config.Clientset.NetworkingV1().Ingresses(namespace).Get(context.Background(), ingressName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, rule := range ingress.Spec.Rules {
+		if rule.IngressRuleValue.HTTP.Paths[0].Backend.Service.Name != serviceName {
+			rules = append(rules, rule)
+		}
+	}
+
+	ingress.Spec.Rules = rules
+
+	// Update the ingress object in the API server
+	_, err = config.Clientset.NetworkingV1().Ingresses(namespace).Update(context.Background(), ingress, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+	log.Println(serviceName, "is not exposed anymore in the ingress")
+
+	return nil
+}
