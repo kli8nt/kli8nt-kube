@@ -77,3 +77,48 @@ func DeleteTLSHost(ingressName, namespace, hostToDelete string) error {
 
 	return nil
 }
+
+func AddIngressRule(ingressName, namespace, serviceName string, port int32) error {
+
+	// Get the ingress object from the API server
+	ingress, err := config.Clientset.NetworkingV1().Ingresses(namespace).Get(context.Background(), ingressName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	// create a new IngressRule object with the provided host name and backend service
+	pathType := networkingv1.PathType("Prefix")
+	newRule := networkingv1.IngressRule{
+		Host: serviceName + "." + config.Config.Domain,
+		IngressRuleValue: networkingv1.IngressRuleValue{
+			HTTP: &networkingv1.HTTPIngressRuleValue{
+				Paths: []networkingv1.HTTPIngressPath{
+					{
+						Path:     "/",
+						PathType: &pathType, // specify the path type as Prefix
+						Backend: networkingv1.IngressBackend{
+							Service: &networkingv1.IngressServiceBackend{
+								Name: serviceName, // specify the name of the backend service
+								Port: networkingv1.ServiceBackendPort{
+									Number: port, // specify the port number
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// append the new IngressRule object to the existing list of rules in the Ingress object
+	ingress.Spec.Rules = append(ingress.Spec.Rules, newRule)
+
+	// Update the ingress object in the API server
+	_, err = config.Clientset.NetworkingV1().Ingresses(namespace).Update(context.Background(), ingress, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+	log.Println(serviceName, "is exposed with ingress!")
+
+	return nil
+}
