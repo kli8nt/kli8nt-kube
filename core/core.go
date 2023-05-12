@@ -4,13 +4,14 @@ import (
 	"log"
 
 	"github.com/kli8nt/kli8nt-kube/config"
-	"github.com/kli8nt/kli8nt-kube/utils"
 )
+
+var err error
 
 func Start() {
 	log.Println("Checking The connectivity with ", config.Config.Server)
 
-	err := utils.CreateDeployment("default", "adam", 1, "nginx", "nginx")
+	/*err = utils.CreateDeployment("default", "adam", 1, "nginx", "nginx")
 	if err != nil {
 		log.Println(err)
 	}
@@ -34,6 +35,5 @@ func Start() {
 	err = utils.DeleteDeployment("default", "adam")
 	if err != nil {
 		log.Println(err)
-	}
-
+	}*/
 }

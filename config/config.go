@@ -13,6 +13,7 @@ import (
 type configuration struct {
 	Secret string `env:"SECRET" envDefault:"xZp1CMxquSyj12h3TDyR"`
 	Server string `env:"SERVER" envDefault:"https://localhost:8080"`
+	Domain string `env:"DOMAIN" envDefault:"example.com"`
 }
 
 var Clientset *kubernetes.Clientset
