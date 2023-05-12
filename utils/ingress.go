@@ -40,3 +40,40 @@ func AddTLSHost(ingressName, namespace, newHost string) error {
 
 	return nil
 }
+
+func DeleteTLSHost(ingressName, namespace, hostToDelete string) error {
+	// Get the ingress object from the API server
+	ingress, err := config.Clientset.NetworkingV1().Ingresses(namespace).Get(context.Background(), ingressName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Get the first TLS rule (if any) in the ingress object
+	var tlsRule *networkingv1.IngressTLS
+	if len(ingress.Spec.TLS) > 0 {
+		tlsRule = &ingress.Spec.TLS[0]
+	}
+
+	// If there is no TLS rule, return an error
+	if tlsRule == nil {
+		return err
+	}
+
+	// Remove the specified host from the hosts list of the first TLS rule
+	newHosts := []string{}
+	for _, host := range tlsRule.Hosts {
+		if host != hostToDelete {
+			newHosts = append(newHosts, host)
+		}
+	}
+	tlsRule.Hosts = newHosts
+
+	// Update the ingress object in the API server
+	_, err = config.Clientset.NetworkingV1().Ingresses(namespace).Update(context.Background(), ingress, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+	log.Println(hostToDelete, "is not in the TLS rules now!")
+
+	return nil
+}
